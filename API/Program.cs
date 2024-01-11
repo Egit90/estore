@@ -21,6 +21,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(opt =>
+{
+    opt.AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("https://localhost:3000");
+});
+
 app.MapControllers();
 
 var scope = app.Services.CreateScope();
