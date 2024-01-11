@@ -1,7 +1,8 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Product } from "../../app/models/product";
+import agent from "../../app/api/agent";
+import NotFound from "../../app/errors/NotFound";
 
 const ProductDetails = () => {
   let { id } = useParams<{ id: string }>();
@@ -12,8 +13,8 @@ const ProductDetails = () => {
     const getItem = async () => {
       try {
         setLoging(true);
-        let p = await axios.get(`https://localhost:5000/api/products/${id}`);
-        setProducts(p.data);
+        let p = id && (await agent.Catalog.details(parseInt(id)));
+        p && setProducts(p);
       } catch (error) {
         console.log(error);
       } finally {
@@ -24,7 +25,7 @@ const ProductDetails = () => {
   }, [id]);
 
   if (loading) return <h2>Loading</h2>;
-  if (!products) return <h2>Product Not Found</h2>;
+  if (!products) return <NotFound />;
   return (
     <div className="card card-side bg-base-100 shadow-xl ">
       <figure>
