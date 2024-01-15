@@ -1,35 +1,31 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../app/models/product";
 import ProductCard from "./ProductCard";
-import agent from "../../app/api/agent";
+import { useGetCatalogQuery } from "../../app/api/agent";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 
 function Catalog() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[] | undefined>([]);
+  const { data: catalog, isLoading } = useGetCatalogQuery();
 
   useEffect(() => {
     const getProduct = async () => {
       try {
-        const data = await agent.Catalog.list();
-        setProducts(data);
+        setProducts(catalog);
       } catch (error) {
         console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     getProduct();
-  }, []);
+  }, [catalog]);
 
   return (
     <>
       <div className="flex flex-row flex-wrap gap-4 justify-center">
-        {loading && <ProductCardSkeleton count={20} />}
-        {products.map((e) => (
-          <ProductCard key={e.id} product={e} />
-        ))}
+        {isLoading && <ProductCardSkeleton count={20} />}
+        {products &&
+          products.map((e) => <ProductCard key={e.id} product={e} />)}
       </div>
     </>
   );

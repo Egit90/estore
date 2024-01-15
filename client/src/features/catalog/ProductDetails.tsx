@@ -1,30 +1,87 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Product } from "../../app/models/product";
-import agent from "../../app/api/agent";
+import {
+  useCreateItemMutation,
+  useDeleteItemMutation,
+  useGetProductDetailQuery,
+} from "../../app/api/agent";
 import NotFound from "../../app/errors/NotFound";
+import Loading from "../loading/Loading";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../app/store/configureStore";
+import { removeItem } from "../basket/basketSlice";
 
 const ProductDetails = () => {
-  let { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const [products, setProducts] = useState<Product | null>(null);
-  const [loading, setLoging] = useState(true);
+  const [qty, setQty] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const dispatch = useDispatch();
+  const { basket } = useAppSelector((a) => a.basket);
+
+  const [deleteItem] = useDeleteItemMutation();
+  const [addItem] = useCreateItemMutation();
+
+  const { data: catalog, isLoading } = useGetProductDetailQuery({
+    id: parseInt(id ?? "1"),
+  });
+
+  const item = basket?.items.find((e) => e.productId.toString() === id);
 
   useEffect(() => {
     const getItem = async () => {
       try {
-        setLoging(true);
-        let p = id && (await agent.Catalog.details(parseInt(id)));
-        p && setProducts(p);
+        catalog && setProducts(catalog);
+        item && setQty(item.quantity);
       } catch (error) {
         console.log(error);
-      } finally {
-        setLoging(false);
       }
     };
-    getItem();
-  }, [id]);
 
-  if (loading) return <h2>Loading</h2>;
+    getItem();
+  }, [catalog, item]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseInt(e.target.value);
+    if (v >= 0) setQty(v);
+  };
+
+  const allowUpdateQty = () => {
+    if (item && item.quantity === qty) return false;
+    if (!item && qty == 0) return false;
+    return true;
+  };
+
+  const handleUpdateCart = async () => {
+    try {
+      if (!allowUpdateQty) return;
+      if (!products) return;
+
+      setSubmitting(true);
+      // add
+
+      if (!item || qty > item.quantity) {
+        const newQty = item ? qty - item.quantity : qty;
+        addItem({ productId: products.id, qty: newQty });
+        return;
+      }
+
+      //remove
+      const newQty = item.quantity - qty;
+      deleteItem({ productId: products.id, qty: newQty });
+
+      dispatch(removeItem({ productId: products.id, quantity: newQty }));
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (isLoading) return <Loading />;
   if (!products) return <NotFound />;
   return (
     <div className="card card-side bg-base-100 shadow-xl ">
@@ -61,8 +118,25 @@ const ProductDetails = () => {
           </tbody>
         </table>
 
-        <div className="card-actions justify-end">
-          <button className="btn btn-primary">Watch</button>
+        <div className="justify-end join">
+          <input
+            type="number"
+            placeholder="Qty"
+            className="input input-bordered join-item w-fit rounded-l-full"
+            value={qty}
+            onChange={(e) => handleInputChange(e)}
+          />
+          <button
+            className="btn join-item rounded-r-full"
+            onClick={handleUpdateCart}
+            disabled={submitting || !allowUpdateQty()}
+          >
+            {submitting ? (
+              <span className="loading loading-spinner loading-md"></span>
+            ) : (
+              "Add to cart"
+            )}
+          </button>
         </div>
       </div>
     </div>
