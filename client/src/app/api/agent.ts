@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { router } from "../router/Routes";
 import { Basket } from "../models/basket";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { removeItem, setBasket } from "../../features/basket/basketSlice";
 
 axios.defaults.baseURL = "https://localhost:5000/api/";
 axios.defaults.withCredentials = true;
@@ -50,13 +51,6 @@ const request = {
   delete: async (url: string) => (await axios.delete(url)).data,
 };
 
-// Catalog
-// const Catalog = {
-//   // list: async (): Promise<Product[]> => await request.get("products"),
-//   details: async (id: number): Promise<Product> =>
-//     await request.get(`products/${id}`),
-// };
-
 //Error APi
 const TestErrors = {
   get404Error: async () => await request.get("Buggy/not-found"),
@@ -92,21 +86,44 @@ export const basketApi = createApi({
   baseQuery,
   tagTypes: ["Basket"],
   endpoints: (builder) => ({
+    // Get
     getBasket: builder.query<Basket, void>({
       query: () => `basket`,
       providesTags: [{ type: "Basket", id: "LIST" }],
+
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setBasket(data));
+        } catch {
+          console.log("error");
+        }
+      },
     }),
+    // Create
     createItem: builder.mutation<Basket, { productId: number; qty?: number }>({
       query: ({ productId, qty }) => ({
         url: `Basket?productId=${productId}&quantity=${qty || 1}`,
         method: "POST",
       }),
     }),
-    deleteItem: builder.mutation<void, { productId: number; qty?: number }>({
+    // Delete
+    deleteItem: builder.mutation<void, { productId: number; qty: number }>({
       query: ({ productId, qty }) => ({
-        url: `Basket?productId=${productId}&quantity=${qty || 1}`,
+        url: `Basket?productId=${productId}&quantity=${qty}`,
         method: "DELETE",
       }),
+      onQueryStarted: async (
+        { productId, qty },
+        { dispatch, queryFulfilled }
+      ) => {
+        try {
+          await queryFulfilled;
+          dispatch(removeItem({ productId, quantity: qty }));
+        } catch {
+          console.log("error");
+        }
+      },
     }),
   }),
 });

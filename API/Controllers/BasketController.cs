@@ -13,8 +13,7 @@ public class BasketController(StoreContext context) : BaseApiController
     public async Task<ActionResult<BasketDto>> GetBasket()
     {
         Basket? basket = await RetrieveBasket();
-
-        if (basket == null) return NotFound();
+        basket ??= CreateBasket();
 
         return MapBasketToDto(basket);
     }
@@ -44,6 +43,7 @@ public class BasketController(StoreContext context) : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> RemoveItemFromBasket(int productId, int quantity)
     {
+        return BadRequest("testing error");
         Basket? basket = await RetrieveBasket();
         if (basket == null) return NotFound();
 

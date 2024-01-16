@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BasketItem } from "../../app/models/basket";
 import {
   useCreateItemMutation,
@@ -7,38 +6,36 @@ import {
 import { toast } from "react-toastify";
 import { currencyFormat } from "../../app/util/util";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { removeItem } from "./basketSlice";
 
 const BasketItems = ({ item }: { item: BasketItem }) => {
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-
-  const [deleteItem] = useDeleteItemMutation();
-  const [addItem] = useCreateItemMutation();
+  const [deleteItem, { isLoading: isDeleteLoading, error: deleteError }] =
+    useDeleteItemMutation();
+  const [addItem, { isLoading: isAddLoading, error: addError }] =
+    useCreateItemMutation();
 
   const handleAddItem = async (productID: number) => {
     try {
-      setLoading(true);
       addItem({ productId: productID });
     } catch (error) {
       toast.error("Faild to add Item");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleRemoveItem = async (producId: number, qty: number) => {
     try {
-      setLoading(true);
       deleteItem({ productId: producId, qty: qty });
-      dispatch(removeItem({ productId: producId, quantity: qty }));
     } catch (error) {
       toast.error("Failed to remove Item");
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (deleteError)
+    toast.error(
+      `Falied to Remove = ${"data" in deleteError && deleteError.data}`
+    );
+
+  if (addError)
+    toast.error(`Falied to Remove = ${"data" in addError && addError.data}`);
 
   return (
     <tr>
@@ -61,7 +58,7 @@ const BasketItems = ({ item }: { item: BasketItem }) => {
             className="border rounded-md py-2 px-4 mr-2"
             onClick={() => handleRemoveItem(item.productId, 1)}
           >
-            {loading ? (
+            {isDeleteLoading ? (
               <span className="loading loading-ball loading-xs"></span>
             ) : (
               "-"
@@ -72,7 +69,7 @@ const BasketItems = ({ item }: { item: BasketItem }) => {
             className="border rounded-md py-2 px-4 ml-2"
             onClick={() => handleAddItem(item.productId)}
           >
-            {loading ? (
+            {isAddLoading ? (
               <span className="loading loading-ball loading-xs"></span>
             ) : (
               "+"
@@ -83,7 +80,7 @@ const BasketItems = ({ item }: { item: BasketItem }) => {
       <td className="py-4">{currencyFormat(item.price * item.quantity)}</td>
       <td>
         {/* trash */}
-        {loading ? (
+        {isAddLoading || isDeleteLoading ? (
           <span className="loading loading-ball loading-xs"></span>
         ) : (
           <svg
