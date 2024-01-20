@@ -43,7 +43,6 @@ public class BasketController(StoreContext context) : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> RemoveItemFromBasket(int productId, int quantity)
     {
-        return BadRequest("testing error");
         Basket? basket = await RetrieveBasket();
         if (basket == null) return NotFound();
 

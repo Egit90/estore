@@ -1,10 +1,12 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { Product } from "../models/product";
+import { Product, ProductParam } from "../models/product";
 import { toast } from "react-toastify";
 import { router } from "../router/Routes";
 import { Basket } from "../models/basket";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { removeItem, setBasket } from "../../features/basket/basketSlice";
+import { MetaData, PaginatedResponse } from "../models/pagination";
+import { setMetaData } from "../../features/catalog/filterSloce";
 
 axios.defaults.baseURL = "https://localhost:5000/api/";
 axios.defaults.withCredentials = true;
@@ -65,18 +67,69 @@ const baseQuery = fetchBaseQuery({
   credentials: "include",
 });
 
+type Filters = {
+  brands: string[];
+  types: string[];
+};
+
+export const generateCatalogParams = ({ pageNumber, pageSize, orderBy, searchTerm, brands, types }: ProductParam) => {
+  const params: string[] = [];
+
+  params.push("PageNumber" + "=" + pageNumber.toString());
+  params.push("PageSize" + "=" + pageSize.toString());
+  params.push("OrderBy" + "=" + orderBy ?? "Price");
+
+  if (searchTerm) params.push("SearchTerm" + "=" + searchTerm);
+
+  if (brands) params.push("Brands" + "=" + brands.join(","));
+
+  if (types) params.push("Types" + "=" + types.join(","));
+
+  return params.join("&");
+};
+
 export const catalogApi = createApi({
   reducerPath: "catalogApi",
   baseQuery,
   tagTypes: ["Catalog"],
   endpoints: (builder) => ({
-    getCatalog: builder.query<Product[], void>({
-      query: () => "products",
+    // getCatalog
+    getCatalog: builder.query<PaginatedResponse<Product[]>, string>({
+      query: (URLSearchParams) => {
+        return "products" + "?" + URLSearchParams;
+      },
+      transformResponse: (res: Product[], meta) => {
+        const header = meta?.response?.headers.get("Pagination");
+        if (!header) throw new Error("Pagination headers are missing");
+        const metaDataJson: MetaData = JSON.parse(header);
+        return {
+          items: res,
+          metaData: {
+            currentPage: metaDataJson.currentPage,
+            totalPages: metaDataJson.totalPages,
+            pageSize: metaDataJson.pageSize,
+            totalCount: metaDataJson.totalCount,
+          },
+        };
+      },
+      onQueryStarted: async (_, api) => {
+        try {
+          const { data } = await api.queryFulfilled;
+          api.dispatch(setMetaData(data.metaData));
+        } catch (error) {
+          console.log(error);
+        }
+      },
       providesTags: [{ type: "Catalog", id: "LIST" }],
     }),
+    // productDetails
     getProductDetail: builder.query<Product, { id: number }>({
       query: ({ id }) => `products/${id}`,
-      providesTags: (result, error, { id }) => [{ type: "Catalog", id }],
+      providesTags: (_, __, { id }) => [{ type: "Catalog", id }],
+    }),
+    // filters
+    getProductFilters: builder.query<Filters, void>({
+      query: () => "products/filters",
     }),
   }),
 });
@@ -113,10 +166,7 @@ export const basketApi = createApi({
         url: `Basket?productId=${productId}&quantity=${qty}`,
         method: "DELETE",
       }),
-      onQueryStarted: async (
-        { productId, qty },
-        { dispatch, queryFulfilled }
-      ) => {
+      onQueryStarted: async ({ productId, qty }, { dispatch, queryFulfilled }) => {
         try {
           await queryFulfilled;
           dispatch(removeItem({ productId, quantity: qty }));
@@ -134,10 +184,6 @@ const agent = {
 
 export default agent;
 
-export const {
-  useGetBasketQuery,
-  useCreateItemMutation,
-  useDeleteItemMutation,
-} = basketApi;
+export const { useGetBasketQuery, useCreateItemMutation, useDeleteItemMutation } = basketApi;
 
-export const { useGetCatalogQuery, useGetProductDetailQuery } = catalogApi;
+export const { useGetCatalogQuery, useGetProductDetailQuery, useGetProductFiltersQuery, useLazyGetCatalogQuery } = catalogApi;

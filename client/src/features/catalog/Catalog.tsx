@@ -1,31 +1,46 @@
-import { useEffect, useState } from "react";
-import { Product } from "../../app/models/product";
 import ProductCard from "./ProductCard";
-import { useGetCatalogQuery } from "../../app/api/agent";
+import { generateCatalogParams, useGetCatalogQuery } from "../../app/api/agent";
 import ProductCardSkeleton from "./ProductCardSkeleton";
+import { toast } from "react-toastify";
+import Filter from "./Filter";
+import { useAppSelector } from "../../app/store/configureStore";
+import Pagination from "../../components/Pagination";
+import { useDispatch } from "react-redux";
+import { setPageNumber } from "./filterSloce";
 
 function Catalog() {
-  const [products, setProducts] = useState<Product[] | undefined>([]);
-  const { data: catalog, isLoading } = useGetCatalogQuery();
+  const { brands, searchTerm, sort: orderBy, types, metaData } = useAppSelector((e) => e.filter);
+  const dispatch = useDispatch();
+  const debouncedParams = generateCatalogParams({
+    pageNumber: metaData.currentPage,
+    pageSize: metaData.pageSize,
+    brands,
+    types,
+    searchTerm,
+    orderBy,
+  });
 
-  useEffect(() => {
-    const getProduct = async () => {
-      try {
-        setProducts(catalog);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
+  const { data: catalog, error: catalogError, isLoading } = useGetCatalogQuery(debouncedParams);
 
-    getProduct();
-  }, [catalog]);
+  if (catalogError) {
+    toast.error(`error getting the filters , ${"data" in catalogError && catalogError.data}`);
+  }
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-4 justify-center">
-        {isLoading && <ProductCardSkeleton count={20} />}
-        {products &&
-          products.map((e) => <ProductCard key={e.id} product={e} />)}
+      <div className="grid grid-cols-4">
+        <div className="sticky top-0 h-screen">
+          <Filter />
+        </div>
+        <div className="col-span-3 flex flex-row flex-wrap gap-4 justify-center max-h-fit align-middle  items-baseline">
+          {isLoading && <ProductCardSkeleton count={20} />}
+          {catalog && catalog.items.map((e) => <ProductCard key={e.id} product={e} />)}
+        </div>
+      </div>
+      <div className="flex justify-center mt-4">
+        <div className="join mx-auto max-w-full">
+          <Pagination metaData={catalog?.metaData} onClick={(n) => dispatch(setPageNumber(n))} />
+        </div>
       </div>
     </>
   );

@@ -15,13 +15,13 @@ const ProductCard = ({ product }: { product: Product }) => {
   );
 
   return (
-    <div className="card card-compact w-80 bg-base-100 shadow-xl">
+    <div className="card card-compact w-80 border border-primary bg-base-100 shadow-xl">
       <Link to={`/catalog/${product.id}`}>
-        <figure className="bg-secondary">
+        <figure className="bg-secondary rounded-sm">
           <img src={product.pictureUrl} alt={product.name} />
         </figure>
       </Link>
-      <div className="card-body">
+      <div className="card-body ">
         <h2 className="card-title">{product.name}</h2>
         <h2 className="card-title">{currencyFormat(product.price)} </h2>
         <p>
