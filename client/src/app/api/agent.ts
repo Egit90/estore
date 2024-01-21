@@ -21,6 +21,7 @@ axios.interceptors.response.use(
   (err: AxiosError) => {
     const { data, status } = err.response as AxiosResponse;
 
+    console.log(data);
     switch (status) {
       case 400:
         if (data.errors) {

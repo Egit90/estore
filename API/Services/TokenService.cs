@@ -18,6 +18,7 @@ public class TokenService(UserManager<User> userManager, IConfiguration config)
         {
             new(ClaimTypes.Email , user.Email!),
             new(ClaimTypes.Name, user.UserName!),
+            new(ClaimTypes.NameIdentifier, user.Id),
         };
 
 

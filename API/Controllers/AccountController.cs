@@ -23,7 +23,8 @@ public class AccountController(UserManager<User> userManager, TokenService token
         return new UserDto
         {
             Email = user.Email!,
-            Token = await _tokenService.GenerateToken(user)
+            UserName = user.UserName!,
+            Token = await _tokenService.GenerateToken(user),
         };
     }
 
@@ -53,13 +54,18 @@ public class AccountController(UserManager<User> userManager, TokenService token
     [HttpGet("currentUser")]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        var user = await userManager.FindByNameAsync(User.Identity.Name);
+        var user = await userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return Unauthorized();
+        }
 
         return new UserDto
         {
-            Email = user.Email,
+            Email = user.Email!,
+            UserName = user.UserName!,
             Token = await _tokenService.GenerateToken(user)
-
         };
     }
 
