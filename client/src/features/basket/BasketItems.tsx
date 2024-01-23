@@ -1,52 +1,39 @@
 import { BasketItem } from "../../app/models/basket";
-import {
-  useCreateItemMutation,
-  useDeleteItemMutation,
-} from "../../app/api/agent";
 import { toast } from "react-toastify";
 import { currencyFormat } from "../../app/util/util";
 import { Link } from "react-router-dom";
+import { useCreateItemMutation, useDeleteItemMutation } from "../../app/api/basketApi";
 
 const BasketItems = ({ item }: { item: BasketItem }) => {
-  const [deleteItem, { isLoading: isDeleteLoading, error: deleteError }] =
-    useDeleteItemMutation();
-  const [addItem, { isLoading: isAddLoading, error: addError }] =
-    useCreateItemMutation();
+  const [deleteItem, { isLoading: isDeleteLoading, error: deleteError }] = useDeleteItemMutation();
+  const [addItem, { isLoading: isAddLoading, error: addError }] = useCreateItemMutation();
 
   const handleAddItem = async (productID: number) => {
     try {
       addItem({ productId: productID });
     } catch (error) {
-      toast.error("Faild to add Item");
+      toast.error("Failed to add Item");
     }
   };
 
-  const handleRemoveItem = async (producId: number, qty: number) => {
+  const handleRemoveItem = async (ProductId: number, qty: number) => {
     try {
-      deleteItem({ productId: producId, qty: qty });
+      deleteItem({ productId: ProductId, qty: qty });
     } catch (error) {
       toast.error("Failed to remove Item");
     }
   };
 
-  if (deleteError)
-    toast.error(
-      `Falied to Remove = ${"data" in deleteError && deleteError.data}`
-    );
+  if (deleteError) toast.error(`Failed to Remove = ${"data" in deleteError && deleteError.data}`);
 
-  if (addError)
-    toast.error(`Falied to Remove = ${"data" in addError && addError.data}`);
+  if (addError) toast.error(`Failed to Remove = ${"data" in addError && addError.data}`);
 
   return (
     <tr>
       <td className="py-4">
         <div className="flex items-center">
           <Link to={`/catalog/${item.productId}`}>
-            <img
-              className="h-16 w-16 mr-4"
-              src={item.pictureUrl}
-              alt="Product image"
-            />
+            <img className="h-16 w-16 mr-4" src={item.pictureUrl} alt="Product image" />
           </Link>
           <span className="font-semibold">{item.name}</span>
         </div>
@@ -54,26 +41,12 @@ const BasketItems = ({ item }: { item: BasketItem }) => {
       <td className="py-4">{currencyFormat(item.price)}</td>
       <td className="py-4">
         <div className="flex items-center">
-          <button
-            className="border rounded-md py-2 px-4 mr-2"
-            onClick={() => handleRemoveItem(item.productId, 1)}
-          >
-            {isDeleteLoading ? (
-              <span className="loading loading-ball loading-xs"></span>
-            ) : (
-              "-"
-            )}
+          <button className="border rounded-md py-2 px-4 mr-2" onClick={() => handleRemoveItem(item.productId, 1)}>
+            {isDeleteLoading ? <span className="loading loading-ball loading-xs"></span> : "-"}
           </button>
           <span className="text-center w-8">{item.quantity}</span>
-          <button
-            className="border rounded-md py-2 px-4 ml-2"
-            onClick={() => handleAddItem(item.productId)}
-          >
-            {isAddLoading ? (
-              <span className="loading loading-ball loading-xs"></span>
-            ) : (
-              "+"
-            )}
+          <button className="border rounded-md py-2 px-4 ml-2" onClick={() => handleAddItem(item.productId)}>
+            {isAddLoading ? <span className="loading loading-ball loading-xs"></span> : "+"}
           </button>
         </div>
       </td>
@@ -83,14 +56,7 @@ const BasketItems = ({ item }: { item: BasketItem }) => {
         {isAddLoading || isDeleteLoading ? (
           <span className="loading loading-ball loading-xs"></span>
         ) : (
-          <svg
-            className="cursor-pointer"
-            fill="red"
-            viewBox="0 0 16 16"
-            height="1em"
-            width="1em"
-            onClick={() => handleRemoveItem(item.productId, item.quantity)}
-          >
+          <svg className="cursor-pointer" fill="red" viewBox="0 0 16 16" height="1em" width="1em" onClick={() => handleRemoveItem(item.productId, item.quantity)}>
             <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z" />
             <path
               fillRule="evenodd"

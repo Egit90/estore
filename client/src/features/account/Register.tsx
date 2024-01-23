@@ -67,9 +67,8 @@ const Register = () => {
               <span className="text-base label-text">Email</span>
             </label>
             <input
-              type="text"
-              placeholder="Email"
-              pattern=""
+              type="email"
+              placeholder="email"
               className={`w-full input  input-primary input-bordered ${errors.userName ? "input-error" : ""}`}
               {...register("email", { required: "Email Is Required", pattern: { value: /^\w+[\w-.]*@\w+((-\w+)|(\w*))\.[a-z]{2,3}$/, message: "Not a valid Email Address" } })}
             />
@@ -99,12 +98,6 @@ const Register = () => {
               {isSubmitting ? <span className="loading loading-spinner loading-md"> </span> : "Register"}
             </button>
           </div>
-          {/* {regError &&
-            regError.map((e, i) => (
-              <p className="text-red-400" key={i}>
-                {e}
-              </p>
-            ))} */}
         </form>
       </div>
     </div>

@@ -4,7 +4,7 @@ import MaxWidthWrapper from "./MaxWidthWrapper";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import Loading from "../../features/loading/Loading";
-import { useGetBasketQuery } from "../api/agent";
+import { useGetBasketQuery } from "../api/basketApi";
 
 function App() {
   const { isLoading, isError } = useGetBasketQuery();

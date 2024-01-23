@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Product } from "../../app/models/product";
-import {
-  useCreateItemMutation,
-  useDeleteItemMutation,
-  useGetProductDetailQuery,
-} from "../../app/api/agent";
 import NotFound from "../../app/errors/NotFound";
 import Loading from "../loading/Loading";
 import { toast } from "react-toastify";
 import { useAppSelector } from "../../app/store/configureStore";
 import { currencyFormat } from "../../app/util/util";
+import { useCreateItemMutation, useDeleteItemMutation } from "../../app/api/basketApi";
+import { useGetProductDetailQuery } from "../../app/api/catalogApi";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [qty, setQty] = useState(0);
   const { basket } = useAppSelector((a) => a.basket);
 
-  const [deleteItem, { isLoading: isDeleteLoading, error: deleteError }] =
-    useDeleteItemMutation();
+  const [deleteItem, { isLoading: isDeleteLoading, error: deleteError }] = useDeleteItemMutation();
 
   const [addItem, { isLoading: isCreateItemLoading }] = useCreateItemMutation();
 
@@ -63,11 +59,7 @@ const ProductDetails = () => {
   };
 
   if (deleteError) {
-    toast.error(
-      `Error Performing the delete actcion ${
-        "data" in deleteError && deleteError.data
-      }`
-    );
+    toast.error(`Error Performing the delete actcion ${"data" in deleteError && deleteError.data}`);
   }
 
   if (isLoading || isDeleteLoading || isCreateItemLoading) return <Loading />;
@@ -80,23 +72,9 @@ const ProductDetails = () => {
       <div className="card-body prose">
         <ItemTable product={products} />
         <div className="justify-end join">
-          <input
-            type="number"
-            placeholder="Qty"
-            className="input input-bordered join-item w-fit rounded-l-full"
-            value={qty}
-            onChange={(e) => handleInputChange(e)}
-          />
-          <button
-            className="btn join-item rounded-r-full"
-            onClick={handleUpdateCart}
-            disabled={isDeleteLoading || !allowUpdateQty()}
-          >
-            {isDeleteLoading || isCreateItemLoading ? (
-              <span className="loading loading-spinner loading-md"></span>
-            ) : (
-              "Update Cart"
-            )}
+          <input type="number" placeholder="Qty" className="input input-bordered join-item w-fit rounded-l-full" value={qty} onChange={(e) => handleInputChange(e)} />
+          <button className="btn join-item rounded-r-full" onClick={handleUpdateCart} disabled={isDeleteLoading || !allowUpdateQty()}>
+            {isDeleteLoading || isCreateItemLoading ? <span className="loading loading-spinner loading-md"></span> : "Update Cart"}
           </button>
         </div>
       </div>

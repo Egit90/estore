@@ -9,34 +9,40 @@ interface CustomError {
     title: string;
     errors: { [key: string]: string };
   };
+  status: number;
 }
 
 export const rtkQueryErrorLogger: Middleware = () => (next) => (action) => {
   if (isRejectedWithValue(action)) {
-    console.warn("We got a rejected action!");
-
-    const { data } = action.payload as CustomError;
-
-    switch (data.status) {
-      case 400:
-        if (data.errors) {
-          const modelStateErrors: string[] = [];
-          for (const key in data.errors) {
-            if (data.errors[key]) modelStateErrors.push(data.errors[key]);
+    const { data, status } = action.payload as CustomError;
+    if (data) {
+      switch (data.status) {
+        case 404:
+          toast.error("404 Not Found");
+          break;
+        case 400:
+          if (data.errors) {
+            const modelStateErrors: string[] = [];
+            ``;
+            for (const key in data.errors) {
+              if (data.errors[key]) modelStateErrors.push(data.errors[key]);
+            }
+            throw modelStateErrors.flat();
           }
-          throw modelStateErrors.flat();
-        }
-        toast.error(data.title);
-        break;
-      case 401:
-        toast.error(data.title);
-        break;
-      case 500:
-        router.navigate("/server-error", { state: { error: data } });
-        break;
-      default:
-        break;
+          toast.error(data.title);
+          break;
+        case 401:
+          toast.error(data.title);
+          break;
+        case 500:
+          router.navigate("/server-error", { state: { error: data } });
+          break;
+        default:
+          break;
+      }
     }
+
+    if (!data && status === 404) toast.error("404 Not Found");
   }
 
   return next(action);

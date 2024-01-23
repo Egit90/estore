@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useGetProductFiltersQuery } from "../../app/api/agent";
 import { useDispatch } from "react-redux";
 import { FilterState, resetPageNumber, setOrRemoveBrands, setOrRemoveTypes, setSearchTerm, setSort } from "./filterSloce";
 import { useAppSelector } from "../../app/store/configureStore";
 import { useDebounce } from "../../app/util/debounce";
+import { useGetProductFiltersQuery } from "../../app/api/catalogApi";
 
 const Filter = () => {
   const { data, error } = useGetProductFiltersQuery();

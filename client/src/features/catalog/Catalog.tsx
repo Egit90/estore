@@ -1,5 +1,4 @@
 import ProductCard from "./ProductCard";
-import { generateCatalogParams, useGetCatalogQuery } from "../../app/api/agent";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { toast } from "react-toastify";
 import Filter from "./Filter";
@@ -7,6 +6,7 @@ import { useAppSelector } from "../../app/store/configureStore";
 import Pagination from "../../components/Pagination";
 import { useDispatch } from "react-redux";
 import { setPageNumber } from "./filterSloce";
+import { generateCatalogParams, useGetCatalogQuery } from "../../app/api/catalogApi";
 
 function Catalog() {
   const { brands, searchTerm, sort: orderBy, types, metaData } = useAppSelector((e) => e.filter);

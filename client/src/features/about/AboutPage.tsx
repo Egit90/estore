@@ -1,18 +1,25 @@
 import { useState } from "react";
-import agent from "../../app/api/agent";
+import { useLazyGet400ErrorQuery, useLazyGet401ErrorQuery, useLazyGet404ErrorQuery, useLazyGet500ErrorQuery, useLazyGetValidationErrorQuery } from "../../app/api/errorApi";
 
 const AboutPage = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const [get400Error] = useLazyGet400ErrorQuery();
+  const [get404Error] = useLazyGet404ErrorQuery();
+  const [get401Error] = useLazyGet401ErrorQuery();
+  const [get500Error] = useLazyGet500ErrorQuery();
+  const [getValidationError] = useLazyGetValidationErrorQuery();
+
   const error400 = async () => {
     try {
-      await agent.TestErrors.get400Error();
+      await get400Error();
     } catch (error) {
       console.log(error);
     }
   };
   const error404 = async () => {
     try {
-      await agent.TestErrors.get404Error();
+      await get404Error();
     } catch (error) {
       console.log(error);
     }
@@ -20,7 +27,7 @@ const AboutPage = () => {
 
   const error401 = async () => {
     try {
-      await agent.TestErrors.get401Error();
+      await get401Error();
     } catch (error) {
       console.log(error);
     }
@@ -28,16 +35,16 @@ const AboutPage = () => {
 
   const error500 = async () => {
     try {
-      await agent.TestErrors.get500Error();
+      await get500Error();
     } catch (error) {
       console.log(error);
     }
   };
   const errorValidation = async () => {
     try {
-      await agent.TestErrors.getValidationError();
-    } catch (error: any) {
-      setValidationErrors(error);
+      await getValidationError();
+    } catch (error) {
+      if (Array.isArray(error) && error.every((e) => typeof e === "string")) setValidationErrors(error);
     }
   };
 
@@ -58,8 +65,7 @@ const AboutPage = () => {
       <button className="btn btn-primary" onClick={errorValidation}>
         getValidationError
       </button>
-      {validationErrors.length > 0 &&
-        validationErrors.map((e, i) => <p key={i}>{e}</p>)}
+      {validationErrors.length > 0 && validationErrors.map((e, i) => <p key={i}>{e}</p>)}
     </div>
   );
 };

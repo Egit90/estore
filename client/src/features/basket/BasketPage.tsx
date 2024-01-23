@@ -8,7 +8,7 @@ const BasketPage = () => {
   if (!basket)
     return (
       <div className=" flex justify-center items-center fixed top-20 right-0 bottom-0 left-0">
-        <h1> bakset Is Empty </h1>
+        <h1> basket Is Empty </h1>
       </div>
     );
 
@@ -30,10 +30,7 @@ const BasketPage = () => {
                 </thead>
                 <tbody>
                   {/* product */}
-                  {basket &&
-                    basket.items.map((e, i) => (
-                      <BasketItems key={i} item={e} />
-                    ))}
+                  {basket && basket.items.map((e, i) => <BasketItems key={i} item={e} />)}
                 </tbody>
               </table>
             </div>

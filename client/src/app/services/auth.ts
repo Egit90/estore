@@ -1,27 +1,14 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { setUser, signOut } from "../../features/account/accountSlice";
 import { LoginDto, RegisterDto } from "../models/loginDto";
 import { FieldValues } from "react-hook-form";
-import { RootState } from "../store/configureStore";
 import { router } from "../router/Routes";
-
-const authBaseQery = fetchBaseQuery({
-  baseUrl: "https://localhost:5000/api/Account",
-  credentials: "include",
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).persistedReducer.user?.token;
-
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-
-    return headers;
-  },
-});
+import { setBasket } from "../../features/basket/basketSlice";
+import { EndPoints, fetchBaseQueryInstance } from "../api/baseQuery";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: authBaseQery,
+  baseQuery: fetchBaseQueryInstance(EndPoints.account),
   endpoints: (builder) => ({
     login: builder.mutation<LoginDto, FieldValues>({
       query: (parama) => ({
@@ -32,7 +19,9 @@ export const authApi = createApi({
       onQueryStarted: async (_, api) => {
         try {
           const { data } = await api.queryFulfilled;
-          api.dispatch(setUser(data));
+          const { basket, ...user } = data;
+          api.dispatch(setUser(user));
+          if (basket) api.dispatch(setBasket(basket));
         } catch (error) {
           console.log(error);
         }
@@ -45,11 +34,14 @@ export const authApi = createApi({
         body: params,
       }),
     }),
-    getCurrentUser: builder.query<void, LoginDto>({
+    getCurrentUser: builder.query<LoginDto, LoginDto>({
       query: () => "currentUser",
       onQueryStarted: async (_, api) => {
         try {
-          await api.queryFulfilled;
+          const { data } = await api.queryFulfilled;
+          const { basket, ...user } = data;
+          api.dispatch(setUser(user));
+          if (basket) api.dispatch(setBasket(basket));
         } catch (error) {
           api.dispatch(signOut());
           router.navigate("/login");

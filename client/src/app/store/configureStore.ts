@@ -2,13 +2,15 @@ import { configureStore } from "@reduxjs/toolkit";
 import { counterSlice } from "../../features/contact/counterSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { basketSlice } from "../../features/basket/basketSlice";
-import { basketApi, catalogApi } from "../api/agent";
 import { filterSlice } from "../../features/catalog/filterSloce";
 import { rtkQueryErrorLogger } from "./errorMiddleware";
 import { accountSlice } from "../../features/account/accountSlice";
 import { authApi } from "../services/auth";
 import storage from "redux-persist/lib/storage";
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistReducer, persistStore } from "redux-persist";
+import { basketApi } from "../api/basketApi";
+import { catalogApi } from "../api/catalogApi";
+import { errorApi } from "../api/errorApi";
 
 const persistConfig = {
   key: "root",
@@ -26,13 +28,14 @@ export const store = configureStore({
     [basketApi.reducerPath]: basketApi.reducer,
     [catalogApi.reducerPath]: catalogApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [errorApi.reducerPath]: errorApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(basketApi.middleware, catalogApi.middleware, authApi.middleware, rtkQueryErrorLogger),
+    }).concat(basketApi.middleware, catalogApi.middleware, authApi.middleware, errorApi.middleware, rtkQueryErrorLogger),
 });
 
 const persistor = persistStore(store);

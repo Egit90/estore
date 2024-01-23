@@ -2,14 +2,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { signOut } from "../../features/account/accountSlice";
 import { useAuth } from "../hooks/useAuth";
+import { clearBasket } from "../../features/basket/basketSlice";
 
 const UserMenu = () => {
-  const dipatch = useDispatch();
+  const dispatch = useDispatch();
   const Navigate = useNavigate();
 
   const { user } = useAuth();
   const handleLogout = () => {
-    dipatch(signOut());
+    dispatch(signOut());
+    dispatch(clearBasket());
     Navigate("/login");
   };
 

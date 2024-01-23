@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Basket } from "../../app/models/basket";
-import { basketApi } from "../../app/api/agent";
+import { basketApi } from "../../app/api/basketApi";
 
 export interface BasketState {
   basket: Basket | null;
@@ -24,11 +24,12 @@ export const basketSlice = createSlice({
     setBasket: (state, action) => {
       state.basket = action.payload;
     },
+    clearBasket: (state) => {
+      state.basket = null;
+    },
     removeItem: (state, action: PayloadAction<RemoveItemPayload>) => {
       const { productId, quantity } = action.payload;
-      const itemIndex = state.basket?.items.findIndex(
-        (i) => i.productId === productId
-      );
+      const itemIndex = state.basket?.items.findIndex((i) => i.productId === productId);
 
       if (itemIndex === -1 || itemIndex === undefined) return;
       if (!state.basket) return;
@@ -39,10 +40,7 @@ export const basketSlice = createSlice({
         state.basket.items.splice(itemIndex, 1);
       }
 
-      const basketItemsTotal = state.basket.items.reduce(
-        (acc, curr) => curr.price * curr.quantity + acc,
-        0
-      );
+      const basketItemsTotal = state.basket.items.reduce((acc, curr) => curr.price * curr.quantity + acc, 0);
 
       const basketTaxes = parseFloat((basketItemsTotal * 0.07).toFixed(2));
       const basketTotal = basketItemsTotal + basketTaxes;
@@ -53,13 +51,10 @@ export const basketSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addMatcher(
-      basketApi.endpoints.createItem.matchFulfilled,
-      (state, action) => {
-        state.basket = action.payload;
-      }
-    );
+    builder.addMatcher(basketApi.endpoints.createItem.matchFulfilled, (state, action) => {
+      state.basket = action.payload;
+    });
   },
 });
 
-export const { setBasket, removeItem } = basketSlice.actions;
+export const { setBasket, removeItem, clearBasket } = basketSlice.actions;
