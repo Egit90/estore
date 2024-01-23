@@ -1,9 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { LoginDto } from "../../app/models/loginDto";
+import { LoginDto, UserInfo } from "../../app/models/loginDto";
 import { RootState } from "../../app/store/configureStore";
+import { authApi } from "../../app/services/auth";
 
 export interface AccountState {
-  user: LoginDto | null;
+  user: UserInfo | null;
 }
 
 const initialState: AccountState = {
@@ -15,12 +16,19 @@ export const accountSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<LoginDto>) => {
-      state.user = action.payload;
+      state.user = action.payload.userInfo;
     },
     signOut: (state) => {
       state.user = null;
       localStorage.removeItem("user");
     },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
+      if (payload) {
+        state.user = payload.userInfo;
+      }
+    });
   },
 });
 

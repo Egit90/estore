@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Basket } from "../../app/models/basket";
 import { basketApi } from "../../app/api/basketApi";
+import { authApi } from "../../app/services/auth";
 
 export interface BasketState {
   basket: Basket | null;
@@ -53,6 +54,9 @@ export const basketSlice = createSlice({
   extraReducers: (builder) => {
     builder.addMatcher(basketApi.endpoints.createItem.matchFulfilled, (state, action) => {
       state.basket = action.payload;
+    });
+    builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
+      if (payload.basket) state.basket = payload.basket;
     });
   },
 });

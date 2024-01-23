@@ -38,9 +38,13 @@ public class AccountController(UserManager<User> userManager, StoreContext conte
 
         return new UserDto
         {
-            Email = user.Email!,
-            UserName = user.UserName!,
-            Token = await _tokenService.GenerateToken(user),
+            UserInfo = new UserInfoDto
+            {
+
+                Email = user.Email!,
+                UserName = user.UserName!,
+                Token = await _tokenService.GenerateToken(user),
+            },
             Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket?.MapBasketToDto()
         };
     }
@@ -84,9 +88,13 @@ public class AccountController(UserManager<User> userManager, StoreContext conte
 
         return new UserDto
         {
-            Email = user.Email!,
-            UserName = user.UserName!,
-            Token = await _tokenService.GenerateToken(user),
+            UserInfo = new UserInfoDto
+            {
+
+                Email = user.Email!,
+                UserName = user.UserName!,
+                Token = await _tokenService.GenerateToken(user),
+            },
             Basket = userBasket?.MapBasketToDto()
         };
     }

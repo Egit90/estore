@@ -16,16 +16,6 @@ export const authApi = createApi({
         method: "POST",
         body: parama,
       }),
-      onQueryStarted: async (_, api) => {
-        try {
-          const { data } = await api.queryFulfilled;
-          const { basket, ...user } = data;
-          api.dispatch(setUser(user));
-          if (basket) api.dispatch(setBasket(basket));
-        } catch (error) {
-          console.log(error);
-        }
-      },
     }),
     registerNewAccount: builder.mutation<void, RegisterDto>({
       query: (params) => ({

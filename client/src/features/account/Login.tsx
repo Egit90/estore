@@ -1,9 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FieldValues, useForm } from "react-hook-form";
-import { useEffect } from "react";
 import { useLoginMutation } from "../../app/services/auth";
+import { useEffect } from "react";
+import { QueryStatus } from "@reduxjs/toolkit/query";
 
 const Login = () => {
+  const location = useLocation();
+
   const {
     register,
     handleSubmit,
@@ -14,19 +17,15 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const [login, { isSuccess }] = useLoginMutation();
+  const [login, { status }] = useLoginMutation();
 
   const submitForm = async (data: FieldValues) => {
-    try {
-      await login(data);
-    } catch (error) {
-      console.log(error);
-    }
+    await login(data);
   };
 
   useEffect(() => {
-    if (isSuccess) navigate("/catalog");
-  }, [isSuccess, navigate]);
+    if (status === QueryStatus.fulfilled) navigate(location.state?.form || "/catalog");
+  }, [status, location.state?.form, navigate]);
 
   return (
     <div className="relative flex flex-col justify-center h-screen overflow-hidden">
@@ -57,9 +56,6 @@ const Login = () => {
             />
             {errors.password && <span className="text-sm text-red-400">{errors.password.message as string}</span>}
           </div>
-          {/* <a href="#" className="text-xs text-gray-600 hover:underline hover:text-blue-600">
-            Forget Password?
-          </a> */}
           <div className="flex justify-between">
             <button className="btn btn-primary" type="submit" disabled={!isValid}>
               {isSubmitting ? <span className="loading loading-spinner loading-md"> </span> : "Login"}

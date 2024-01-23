@@ -33,7 +33,7 @@ export const rtkQueryErrorLogger: Middleware = () => (next) => (action) => {
           break;
         case 401:
           toast.error(data.title);
-          break;
+          return Promise.reject(data.title);
         case 500:
           router.navigate("/server-error", { state: { error: data } });
           break;
