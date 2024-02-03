@@ -17,10 +17,10 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const [login, { status }] = useLoginMutation();
+  const [loginApi, { status }] = useLoginMutation();
 
   const submitForm = async (data: FieldValues) => {
-    await login(data);
+    await loginApi(data);
   };
 
   useEffect(() => {

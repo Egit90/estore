@@ -8,20 +8,16 @@ import { useGetBasketQuery } from "../api/basketApi";
 
 function App() {
   const { isLoading, isError } = useGetBasketQuery();
+
   if (isLoading) return <Loading />;
   if (isError) toast.error("Error getting the basket");
 
   return (
-    <>
-      <div>
-        <MaxWidthWrapper>
-          <Header />
-          <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
-          <Outlet />
-        </MaxWidthWrapper>
-      </div>
-    </>
+    <MaxWidthWrapper>
+      <Header />
+      <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
+      <Outlet />
+    </MaxWidthWrapper>
   );
 }
-
 export default App;

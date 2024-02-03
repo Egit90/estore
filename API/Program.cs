@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Put Bearer Toket In the Box",
+        Description = "Put Bearer Token In the Box",
         Reference = new OpenApiReference
         {
             Id = JwtBearerDefaults.AuthenticationScheme,
@@ -45,7 +45,7 @@ builder.Services.AddIdentityCore<User>(opt =>
                 {
                     opt.User.RequireUniqueEmail = true;
                 })
-                .AddRoles<IdentityRole>()
+                .AddRoles<Role>()
                 .AddEntityFrameworkStores<StoreContext>();
 
 builder.Services.AddScoped<TokenService>();

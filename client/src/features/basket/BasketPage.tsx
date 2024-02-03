@@ -13,7 +13,7 @@ const BasketPage = () => {
     );
 
   return (
-    <div className="h-screen py-8">
+    <div className="py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-2xl mb-4">Shopping Cart</h1>
         <div className="flex flex-col md:flex-row gap-4">

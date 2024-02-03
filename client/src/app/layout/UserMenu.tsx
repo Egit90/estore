@@ -37,7 +37,7 @@ const UserMenu = () => {
           </a>
         </li>
         <li>
-          <a>Settings</a>
+          <Link to={"/orders"}>My Orders</Link>
         </li>
         <li>
           <button onClick={handleLogout}>Logout</button>

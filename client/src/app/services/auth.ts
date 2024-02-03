@@ -5,6 +5,7 @@ import { FieldValues } from "react-hook-form";
 import { router } from "../router/Routes";
 import { setBasket } from "../../features/basket/basketSlice";
 import { EndPoints, fetchBaseQueryInstance } from "../api/baseQuery";
+import { ShippingAddress } from "../models/orderDto";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -38,7 +39,10 @@ export const authApi = createApi({
         }
       },
     }),
+    getAddress: builder.query<ShippingAddress, void>({
+      query: () => "savedAddress",
+    }),
   }),
 });
 
-export const { useGetCurrentUserQuery, useLazyGetCurrentUserQuery, useLoginMutation, useRegisterNewAccountMutation } = authApi;
+export const { useGetCurrentUserQuery, useLazyGetCurrentUserQuery, useLoginMutation, useRegisterNewAccountMutation, useGetAddressQuery } = authApi;

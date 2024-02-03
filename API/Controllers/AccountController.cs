@@ -113,4 +113,15 @@ public class AccountController(UserManager<User> userManager, StoreContext conte
                             .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
     }
 
+    [Authorize]
+    [HttpGet("savedAddress")]
+    public async Task<ActionResult<UserAddress>> getSavedAddress()
+    {
+        return await userManager.Users
+                                .Where(x => x.UserName == User.Identity.Name)
+                                .Select(u => u.Address)
+                                .FirstOrDefaultAsync();
+    }
+
+
 }
