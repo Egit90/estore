@@ -18,7 +18,7 @@ const BasketSummary = ({ basket, showOnly = false }: { basket: Basket; showOnly?
         </div>
         <div className="flex justify-between mb-2">
           <span>Shipping</span>
-          <span>{basket.basketShipping === 0 ? "free" : `$ ${basket.basketShipping}`}</span>
+          <span>{basket.basketShipping === 0 ? "free" : `${currencyFormat(basket.basketShipping)}`}</span>
         </div>
         <hr className="my-2" />
         <div className="flex justify-between mb-2">

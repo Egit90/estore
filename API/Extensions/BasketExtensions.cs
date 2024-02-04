@@ -15,11 +15,13 @@ public static class BasketExtensions
 
         var Tax = (long)(BasketItemsTotal * 0.07);
 
-        var shipping = 0;
+        var shipping = BasketItemsTotal > 10000 ? 0 : 500;
         return new BasketDto
         {
             Id = basket.Id,
             BuyerId = basket.BuyerId,
+            PaymentIntentId = basket.PaymentIntentId,
+            ClientSecret = basket.ClientSecret,
             Items = basket.Items.Select(item => new BasketItemDto
             {
                 ProductId = item.ProductId,
@@ -30,7 +32,6 @@ public static class BasketExtensions
                 Quantity = item.Quantity,
                 PictureUrl = item.Product.PictureUrl
             }).ToList(),
-
             BasketItemsTotal = BasketItemsTotal,
             BasketTaxes = Tax,
             BasketShipping = shipping,

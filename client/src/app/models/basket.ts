@@ -6,6 +6,8 @@ export interface Basket {
   basketItemsTotal: number;
   basketTaxes: number;
   basketShipping: number;
+  paymentIntentId?: string;
+  clientSecret?: string;
 }
 
 export interface BasketItem {

@@ -13,6 +13,7 @@ import { catalogApi } from "../api/catalogApi";
 import { errorApi } from "../api/errorApi";
 import { themeSlice } from "../layout/themeSlice";
 import { ordersApi } from "../api/ordersApi";
+import { paymentApi } from "../api/paymentApi";
 
 const persistConfig = {
   key: "root",
@@ -33,13 +34,14 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [errorApi.reducerPath]: errorApi.reducer,
     [ordersApi.reducerPath]: ordersApi.reducer,
+    [paymentApi.reducerPath]: paymentApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(basketApi.middleware, ordersApi.middleware, catalogApi.middleware, authApi.middleware, errorApi.middleware, rtkQueryErrorLogger),
+    }).concat(basketApi.middleware, ordersApi.middleware, paymentApi.middleware, catalogApi.middleware, authApi.middleware, errorApi.middleware, rtkQueryErrorLogger),
 });
 
 const persistor = persistStore(store);

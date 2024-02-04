@@ -8,12 +8,13 @@ import ContactPage from "../../features/contact/ContactPage";
 import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
-import Checkout from "../../features/checkOut/Checkout";
 import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
 import RequireAuth from "./RequireAuth";
 import Orders from "../../features/orders/Orders";
 import SingleOrder from "../../features/orders/SingleOrder";
+import CheckoutWrapper from "../../features/checkOut/CheckoutWrapper";
+import Confirmation from "../../features/checkOut/Confirmation";
 
 export const router = createBrowserRouter([
   {
@@ -23,9 +24,10 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          { path: "checkout", element: <Checkout /> },
+          { path: "checkout", element: <CheckoutWrapper /> },
           { path: "orders", element: <Orders /> },
           { path: "singleOrder", element: <SingleOrder /> },
+          { path: "confirmation", element: <Confirmation /> },
         ],
       },
       { path: "", element: <HomePage /> },

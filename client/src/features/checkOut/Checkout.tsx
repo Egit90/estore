@@ -7,18 +7,23 @@ import Payment from "./Payment";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { validationSchema } from "./checkOutValidation";
-import Confirmation from "./Confirmation";
 import { useCreateOrderMutation } from "../../app/api/ordersApi";
 import { useDispatch } from "react-redux";
 import { basketApi } from "../../app/api/basketApi";
 import { useGetAddressQuery } from "../../app/services/auth";
+import { useElements, useStripe } from "@stripe/react-stripe-js";
+import { useNavigate } from "react-router-dom";
 
 const Checkout = () => {
   const { basket } = useAppSelector((s) => s.basket);
   const [step, setStep] = useState(1);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
-  const [orderNumber, setOrderNumber] = useState(0);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const stripe = useStripe();
+  const elements = useElements();
+  const [declinedMessage, setDeclinedMessage] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const { data: shippingAddressSavedInDb } = useGetAddressQuery();
 
@@ -33,36 +38,6 @@ const Checkout = () => {
         return <ShippingInformation />;
       case 2:
         return <Payment />;
-      case 3:
-        return <Confirmation isLoading={isLoading} orderNumber={orderNumber} />;
-    }
-  };
-
-  const handleSubmit = async (data: FieldValues) => {
-    if (step < 2) {
-      setStep((e) => e + 1);
-      return;
-    }
-
-    const { saveAddress, address1, address2, city, country, fullName, state, zip } = data;
-    setStep((e) => e + 1);
-    console.log(data);
-    const res = await createOrder({
-      saveAddress: saveAddress,
-      shippingAddress: {
-        address1,
-        address2,
-        city,
-        country,
-        fullName,
-        state,
-        zip,
-      },
-    });
-
-    if ("data" in res) {
-      setOrderNumber(res.data);
-      dispatch(basketApi.util.invalidateTags(["Basket"]));
     }
   };
 
@@ -77,7 +52,51 @@ const Checkout = () => {
     if (step === 3) return;
     setStep(a);
   };
-  
+
+  const handleNext = async (data: FieldValues) => {
+    if (step < 2) {
+      setStep((e) => e + 1);
+      return;
+    }
+
+    // event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setPaymentLoading(true);
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+    });
+
+    setPaymentLoading(false);
+    if (error) {
+      // declined
+      setDeclinedMessage(error.message!);
+    } else if (paymentIntent && paymentIntent?.status === "succeeded") {
+      const { saveAddress, address1, address2, city, country, fullName, state, zip } = data;
+
+      const res = await createOrder({
+        saveAddress: saveAddress,
+        shippingAddress: {
+          address1,
+          address2,
+          city,
+          country,
+          fullName,
+          state,
+          zip,
+        },
+      });
+      if ("data" in res) {
+        dispatch(basketApi.util.invalidateTags(["Basket"]));
+        navigate("/confirmation", { state: { data: res.data } });
+      }
+    }
+  };
+
   useEffect(() => {
     if (shippingAddressSavedInDb) {
       methods.reset({ ...methods.getValues(), ...shippingAddressSavedInDb, saveAddress: false });
@@ -88,7 +107,7 @@ const Checkout = () => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(handleSubmit)} className="justify-center w-full mx-auto">
+      <form onSubmit={methods.handleSubmit(handleNext)} className="justify-center w-full mx-auto">
         <div className="gradient-bg rounded-md p-1 ">
           <div className="flex flex-col justify-center w-full bg-base-300 rounded-lg p-8 ">
             <ul className="steps">
@@ -98,19 +117,18 @@ const Checkout = () => {
               <li onClick={() => addOrRemoveStep(2)} className={`step  transition duration-200 ease-in-out ${isPrimary(2)}`}>
                 Payment
               </li>
-              <li onClick={() => addOrRemoveStep(3)} className={`step  transition duration-200 ease-in-out ${isPrimary(3)}`}>
-                Purchase
-              </li>
             </ul>
             <div className="mx-auto w-full">
               <div className="flex flex-col w-full px-0 mx-auto lg:flex-row">
                 <div className="flex flex-col md:w-full  bg-base-300 rounded-lg p-8">
                   {stepper()}
-                  {step < 3 && (
+                  {declinedMessage.length > 0 && <p className="font-bold text-red-400"> {declinedMessage}</p>}
+                  {/* Submit */}
+                  {step <= 2 && (
                     <div className="mt-4">
-                      <button className="w-full px-6 py-2 btn btn-primary" type="submit" disabled={!methods.formState.isValid}>
+                      <button className="w-full px-6 py-2 btn btn-primary" type="submit" disabled={!methods.formState.isValid || paymentLoading}>
                         {step === 2 ? "Pay" : "Next"}
-                        {isLoading && <span className="loading loading-spinner loading-xs absolute top-1/2 -translate-y-1/2 right-4"></span>}
+                        {(isLoading || paymentLoading) && <span className="loading loading-spinner loading-xs absolute top-1/2 -translate-y-1/2 right-4"></span>}
                       </button>
                     </div>
                   )}

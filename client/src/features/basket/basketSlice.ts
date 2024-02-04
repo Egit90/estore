@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Basket } from "../../app/models/basket";
 import { basketApi } from "../../app/api/basketApi";
 import { authApi } from "../../app/services/auth";
+import { paymentApi } from "../../app/api/paymentApi";
 
 export interface BasketState {
   basket: Basket | null;
@@ -57,6 +58,9 @@ export const basketSlice = createSlice({
     });
     builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
       if (payload.basket) state.basket = payload.basket;
+    });
+    builder.addMatcher(paymentApi.endpoints.createPaymentIntent.matchFulfilled, (state, { payload }) => {
+      if (payload) state.basket = payload;
     });
   },
 });

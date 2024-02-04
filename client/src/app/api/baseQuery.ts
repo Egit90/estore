@@ -8,6 +8,7 @@ export enum EndPoints {
   error = "Buggy",
   account = "account",
   orders = "orders",
+  payments = "Payments",
 }
 
 export const fetchBaseQueryInstance = (endPoint?: EndPoints) =>

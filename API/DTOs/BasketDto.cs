@@ -11,5 +11,6 @@ public class BasketDto
     public required long BasketShipping { get; set; }
     public required long BasketTotal { get; set; }
     public required List<BasketItemDto> Items { get; set; }
-
+    public string PaymentIntentId { get; set; } = null!;
+    public string ClientSecret { get; set; } = null!;
 }
