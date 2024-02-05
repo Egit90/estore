@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 *.swp
 
 appdb.db
+
+appsettings.*.json
+wwwroot

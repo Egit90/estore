@@ -1,1 +1,6 @@
+API/appsettings.Development.json
 API/appsettings.json
+API/appdb.db-shm
+.gitignore
+API/appsettings.*.json
+

@@ -17,8 +17,8 @@ const Header = () => {
 
   const midLinks = [
     { title: "catalog", path: "/catalog" },
-    { title: "about", path: "/about" },
-    { title: "contact", path: "/contact" },
+    // { title: "about", path: "/about" },
+    // { title: "contact", path: "/contact" },
   ];
 
   const baseClasses = "kbd over:-translate-y-1 hover:scale-125 transition ease-in-out delay-150";
@@ -27,7 +27,9 @@ const Header = () => {
     <div className="gradient-bg rounded-xl p-1 mb-2">
       <div className="navbar bg-base-100 rounded-xl w-full p-2">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">daisyUI</a>
+          <NavLink className="btn btn-ghost text-xl" to="/">
+            Store
+          </NavLink>
           <div className="flex justify-center gap-2 items-center w-full">
             {midLinks.map(({ title, path }, i) => (
               <NavLink className={({ isActive }) => `${baseClasses} ${isActive ? "font-bold underline" : ""}`} key={i} to={path}>

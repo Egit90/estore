@@ -1,7 +1,7 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/configureStore";
 
-const baseUrl = "https://localhost:5000/api";
+const baseUrl = import.meta.env.VITE_API_URL;
 
 export enum EndPoints {
   basket = "basket",
